@@ -1,5 +1,4 @@
-// This file is part of www.nand2tetris.org
-// and the book "The Elements of Computing Systems"
+// This file is part of www.nand2tetris.org // and the book "The Elements of Computing Systems"
 // by Nisan and Schocken, MIT Press.
 // File name: projects/05/CPU.hdl
 
@@ -39,5 +38,53 @@ CHIP CPU {
         pc[15];          // address of next instruction
 
     PARTS:
-    // Put your code here:
+    Mux16(a=ALUaMux, b=instruction, sel=instructionA, out=muxALUInst);
+    ARegister(in=muxALUInst, load=eRegA, out=registroAaMux, out[0..14]=addressM, out=registroAaPC);
+    // Elegir entre A y M
+    Mux16(a=registroAaMux, b=inM, sel=instruction[12], out=muxAM);
+    DRegister(in=ALUaRegistroD, load=eRegD, out=registroD);
+
+    DMux(in=instruction[11], sel=instructionC, a=basura0, b=inzx);
+    DMux(in=instruction[10], sel=instructionC, a=basura1, b=innx);
+    DMux(in=instruction[9], sel=instructionC, a=basura2, b=inzy);
+    DMux(in=instruction[8], sel=instructionC, a=basura3, b=inny);
+    DMux(in=instruction[7], sel=instructionC, a=basura4, b=inf);
+    DMux(in=instruction[6], sel=instructionC, a=basura5, b=inno);
+
+    ALU(x=registroD, y=muxAM, zx=inzx, nx=innx, zy=inzy, ny=inny, f=inf, no=inno, out=ALUaRegistroD, out=ALUaMux,out=outM, ng=nroNegativo, zr=nroCero);
+
+
+    PC(in=registroAaPC, load=saltar, inc=true, reset=reset, out[0..14]=pc);
+
+    Not(in=instruction[15], out=instructionA);
+    Not(in=instructionA, out=instructionC);
+
+    And(a=instructionC, b=instruction[5], out=instruccionCd1);
+    // Escribir en el registro A cuando sea una instruccion C con d1=1 o cuando sea una instruction A
+    Or(a=instruccionCd1, b=instructionA, out=eRegA); 
+
+    // Escribir en el registro D cuando sea una instruccion C con d2=1
+    And(a=instructionC, b=instruction[4], out=eRegD);
+
+    // Escribir en M cuando sea una instruccion C con d3=1
+    And(a=instructionC, b=instruction[3], out=writeM);
+
+    And(a=nroNegativo, b=instruction[2], out=JLT); // Si out<0 
+    And(a=nroCero, b=instruction[1], out=JEQ); // Si out==0
+
+    Or(a=nroCero, b=nroNegativo, out=orngzr);
+    Not(in=orngzr, out=mayorACero);
+    And(a=mayorACero, b=instruction[0], out=JGT); // Si out>0
+
+    Or(a=JEQ, b=JGT, out=JGE); // Si out>=0
+    Or(a=JEQ, b=JLT, out=JLE); // Si out<=0
+    Or(a=JGT, b=JLT, out=JNE); // Si out!=0
+
+    // Si j1=1, j2=1, j3=1
+    And(a=instruction[2], b=instruction[1], out=j1j2);
+    And(a=j1j2, b=instruction[0], out=JMP);
+
+    Or8Way(in[0]=false, in[1]=JGT, in[2]=JEQ, in[3]=JGE, in[4]=JLT, in[5]=JNE, in[6]=JLE, in[7]=JMP, out=cumpleCondSalto);
+    And(a=instructionC, b=cumpleCondSalto, out=saltar);
+
 }
