@@ -62,9 +62,20 @@ public class Parser {
 
 	}
 	
+    /**
+     * Devuelve el tipo de instruccion asm de la linea actual
+     */
 	public int commandType(){
-		return 0;
-		
+        lineaActual = lineaActual.trim();
+        if (lineaActual.startsWith("@")){
+            return A_COMMAND;
+        }
+        else if (lineaActual.startsWith("(")){
+            return L_COMMAND;
+        }
+        else{
+            return C_COMMAND;
+        }
 	}
 	
 	public String symbol(){
