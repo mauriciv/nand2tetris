@@ -18,9 +18,10 @@ public class Parser {
 	Parser(String archivo){
 
 		try{
-			FileReader fileReader = new FileReader("./asm");
+			FileReader fileReader = new FileReader(archivo);
 			archivoAsm = new BufferedReader(fileReader); 
 			lineaActual = archivoAsm.readLine();
+            lineaActual = lineaActual.trim();
 			archivoAsm.mark(CANTLIMITECARACTERES);
 		}
 		catch (FileNotFoundException e){
