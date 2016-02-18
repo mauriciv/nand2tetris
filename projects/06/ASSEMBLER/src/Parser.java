@@ -50,6 +50,9 @@ public class Parser {
 	 */
 	public void advance() throws IOException{
 		lineaActual = archivoAsm.readLine();
+		if (lineaActual == null){
+			return;
+		}
 		lineaActual= lineaActual.trim();
 		if ( lineaActual.isEmpty() || lineaActual.startsWith("//") ){
 			this.advance();
